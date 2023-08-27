@@ -21,12 +21,19 @@ const markup = galleryItems.map(({ preview, description, original }) => `
 galleryList.insertAdjacentHTML('beforeend', markup.join(''));
 
 
-let instance = null; 
+let instance = null;
+
+function closeEscape(event) {
+    if (event.key === 'Escape' && instance) {
+        instance.close();
+        window.removeEventListener('keydown', closeEscape);
+    }
+}
 
 function onClick(event) {
     event.preventDefault();
 
-    if (!event.target.classList.contains("gallery__image")) {
+    if (event.target.tagName !== 'IMG') {
         return;
     }
 
@@ -34,23 +41,19 @@ function onClick(event) {
 
     instance = basicLightbox.create(`
         <img src="${imgSource}" width="800" height="600">
-    `);
+    `, {
+        onShow: () => {
+            window.addEventListener('keydown', closeEscape);
+        },
+        onClose: () => {
+            window.removeEventListener('keydown', closeEscape);
+        }
+    });
 
     instance.show();
-
-    window.addEventListener('keydown', onEsc);
-}
-
-function onEsc(event) {
-    if (event.key === 'Escape' && instance) { 
-        instance.close();
-        window.removeEventListener('keydown', onEsc);
-    }
 }
 
 galleryList.addEventListener('click', onClick);
-
-
 
 
 
